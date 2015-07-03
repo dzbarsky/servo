@@ -4,10 +4,6 @@
 
 // This file is a Mako template: http://www.makotemplates.org/
 
-// XXXManishearth remove all unsafe blocks when
-// https://github.com/rust-lang/rust/issues/24880 is fixed
-// See #6376
-
 use std::ascii::AsciiExt;
 use std::borrow::ToOwned;
 use std::default::Default;
@@ -5502,7 +5498,7 @@ impl ComputedValues {
         #[inline]
         pub fn mutate_${style_struct.name.lower()}
                 <'a>(&'a mut self) -> &'a mut style_structs::${style_struct.name} {
-            unsafe{ &mut *self.${style_struct.ident}.make_unique() }
+            &mut *self.${style_struct.ident}.make_unique()
         }
     % endfor
 }
@@ -5613,8 +5609,8 @@ fn cascade_with_cached_declarations(
                                                         .clone()
                                         }
                                     };
-                                    unsafe { style_${style_struct.ident}.make_unique()
-                                        .${property.ident} = computed_value; }
+                                    style_${style_struct.ident}.make_unique()
+                                        .${property.ident} = computed_value;
                                 % endif
 
                                 % if property.name in DERIVED_LONGHANDS:
@@ -5624,13 +5620,13 @@ fn cascade_with_cached_declarations(
                                             .${property.ident}.clone();
                                     % endif
                                     % for derived in DERIVED_LONGHANDS[property.name]:
-                                        unsafe { style_${derived.style_struct.ident}
+                                        style_${derived.style_struct.ident}
                                             .make_unique()
                                             .${derived.ident} =
                                             longhands::${derived.ident}
                                                      ::derive_from_${property.ident}(
                                                          computed_value,
-                                                         context); }
+                                                         context);
                                     % endfor
                                 % endif
                             }
@@ -5647,7 +5643,7 @@ fn cascade_with_cached_declarations(
 
     if seen.get_font_style() || seen.get_font_weight() || seen.get_font_stretch() ||
             seen.get_font_family() {
-        unsafe { compute_font_hash(&mut *style_font.make_unique()) }
+        compute_font_hash(&mut *style_font.make_unique())
     }
 
     ComputedValues {
@@ -5859,18 +5855,18 @@ pub fn cascade(viewport_size: Size2D<Au>,
                                                        .clone()
                                     }
                                 };
-                                unsafe { style_${style_struct.ident}.make_unique()
-                                    .${property.ident} = computed_value; }
+                                style_${style_struct.ident}.make_unique()
+                                    .${property.ident} = computed_value;
 
                                 % if property.name in DERIVED_LONGHANDS:
                                     % for derived in DERIVED_LONGHANDS[property.name]:
-                                        unsafe { style_${derived.style_struct.ident}
+                                        style_${derived.style_struct.ident}
                                             .make_unique()
                                             .${derived.ident} =
                                             longhands::${derived.ident}
                                                      ::derive_from_${property.ident}(
                                                          computed_value,
-                                                         &context); }
+                                                         &context);
                                     % endfor
                                 % endif
                             }
@@ -5887,7 +5883,7 @@ pub fn cascade(viewport_size: Size2D<Au>,
 
     // The initial value of border-*-width may be changed at computed value time.
     {
-        let border = unsafe { style_border.make_unique() };
+        let border = style_border.make_unique();
         % for side in ["top", "right", "bottom", "left"]:
             // Like calling to_computed_value, which wouldn't type check.
             if !context.border_${side}_present {
@@ -5898,7 +5894,7 @@ pub fn cascade(viewport_size: Size2D<Au>,
 
     // The initial value of display may be changed at computed value time.
     if !seen.get_display() {
-        let box_ = unsafe { style_box_.make_unique() };
+        let box_ = style_box_.make_unique();
         box_.display = box_.display.to_computed_value(&context);
     }
 
@@ -5914,7 +5910,7 @@ pub fn cascade(viewport_size: Size2D<Au>,
 
     if seen.get_font_style() || seen.get_font_weight() || seen.get_font_stretch() ||
             seen.get_font_family() {
-        unsafe { compute_font_hash(&mut *style_font.make_unique()) }
+        compute_font_hash(&mut *style_font.make_unique())
     }
 
     (ComputedValues {
@@ -5949,7 +5945,7 @@ pub fn cascade_anonymous(parent_style: &ComputedValues) -> ComputedValues {
         root_font_size: parent_style.root_font_size,
     };
     {
-        let border = unsafe { result.border.make_unique() };
+        let border = result.border.make_unique();
         % for side in ["top", "right", "bottom", "left"]:
             // Like calling to_computed_value, which wouldn't type check.
             border.border_${side}_width = Au(0);
@@ -5974,20 +5970,16 @@ pub fn cascade_anonymous(parent_style: &ComputedValues) -> ComputedValues {
 pub fn modify_style_for_replaced_content(style: &mut Arc<ComputedValues>) {
     // Reset `position` to handle cases like `<div style="position: absolute">foo bar baz</div>`.
     if style.box_.display != longhands::display::computed_value::T::inline {
-        unsafe {
-            let mut style = style.make_unique();
-            style.box_.make_unique().display = longhands::display::computed_value::T::inline;
-            style.box_.make_unique().position = longhands::position::computed_value::T::static_;
-        }
+        let mut style = style.make_unique();
+        style.box_.make_unique().display = longhands::display::computed_value::T::inline;
+        style.box_.make_unique().position = longhands::position::computed_value::T::static_;
     }
 
     // Reset `vertical-align` to handle cases like `<sup>foo</sup>`.
     if style.box_.vertical_align != longhands::vertical_align::computed_value::T::baseline {
-        unsafe  {
-            let mut style = style.make_unique();
-            style.box_.make_unique().vertical_align =
-                longhands::vertical_align::computed_value::T::baseline
-        }
+        let mut style = style.make_unique();
+        style.box_.make_unique().vertical_align =
+            longhands::vertical_align::computed_value::T::baseline
     }
 
     // Reset margins.
@@ -5995,14 +5987,12 @@ pub fn modify_style_for_replaced_content(style: &mut Arc<ComputedValues>) {
             style.margin.margin_left != computed::LengthOrPercentageOrAuto::Length(Au(0)) ||
             style.margin.margin_bottom != computed::LengthOrPercentageOrAuto::Length(Au(0)) ||
             style.margin.margin_right != computed::LengthOrPercentageOrAuto::Length(Au(0)) {
-        unsafe {
-            let mut style = style.make_unique();
-            let margin = style.margin.make_unique();
-            margin.margin_top = computed::LengthOrPercentageOrAuto::Length(Au(0));
-            margin.margin_left = computed::LengthOrPercentageOrAuto::Length(Au(0));
-            margin.margin_bottom = computed::LengthOrPercentageOrAuto::Length(Au(0));
-            margin.margin_right = computed::LengthOrPercentageOrAuto::Length(Au(0));
-        }
+        let mut style = style.make_unique();
+        let margin = style.margin.make_unique();
+        margin.margin_top = computed::LengthOrPercentageOrAuto::Length(Au(0));
+        margin.margin_left = computed::LengthOrPercentageOrAuto::Length(Au(0));
+        margin.margin_bottom = computed::LengthOrPercentageOrAuto::Length(Au(0));
+        margin.margin_right = computed::LengthOrPercentageOrAuto::Length(Au(0));
     }
 }
 
@@ -6016,42 +6006,40 @@ pub fn modify_style_for_inline_sides(style: &mut Arc<ComputedValues>,
                                      is_first_fragment_of_element: bool,
                                      is_last_fragment_of_element: bool) {
     fn modify_side(style: &mut Arc<ComputedValues>, side: PhysicalSide) {
-        unsafe {
-            let mut style = style.make_unique();
-            let border = style.border.make_unique();
-            match side {
-                PhysicalSide::Left => {
-                    border.border_left_width = Au(0);
-                    border.border_left_style = BorderStyle::none;
-                    style.padding.make_unique().padding_left =
-                        computed::LengthOrPercentage::Length(Au(0));
-                    style.margin.make_unique().margin_left =
-                        computed::LengthOrPercentageOrAuto::Length(Au(0))
-                }
-                PhysicalSide::Right => {
-                    border.border_right_width = Au(0);
-                    border.border_right_style = BorderStyle::none;
-                    style.padding.make_unique().padding_right =
-                        computed::LengthOrPercentage::Length(Au(0));
-                    style.margin.make_unique().margin_right =
-                        computed::LengthOrPercentageOrAuto::Length(Au(0))
-                }
-                PhysicalSide::Bottom => {
-                    border.border_bottom_width = Au(0);
-                    border.border_bottom_style = BorderStyle::none;
-                    style.padding.make_unique().padding_bottom =
-                        computed::LengthOrPercentage::Length(Au(0));
-                    style.margin.make_unique().margin_bottom =
-                        computed::LengthOrPercentageOrAuto::Length(Au(0))
-                }
-                PhysicalSide::Top => {
-                    border.border_top_width = Au(0);
-                    border.border_top_style = BorderStyle::none;
-                    style.padding.make_unique().padding_top =
-                        computed::LengthOrPercentage::Length(Au(0));
-                    style.margin.make_unique().margin_top =
-                        computed::LengthOrPercentageOrAuto::Length(Au(0))
-                }
+        let mut style = style.make_unique();
+        let border = style.border.make_unique();
+        match side {
+            PhysicalSide::Left => {
+                border.border_left_width = Au(0);
+                border.border_left_style = BorderStyle::none;
+                style.padding.make_unique().padding_left =
+                    computed::LengthOrPercentage::Length(Au(0));
+                style.margin.make_unique().margin_left =
+                    computed::LengthOrPercentageOrAuto::Length(Au(0))
+            }
+            PhysicalSide::Right => {
+                border.border_right_width = Au(0);
+                border.border_right_style = BorderStyle::none;
+                style.padding.make_unique().padding_right =
+                    computed::LengthOrPercentage::Length(Au(0));
+                style.margin.make_unique().margin_right =
+                    computed::LengthOrPercentageOrAuto::Length(Au(0))
+            }
+            PhysicalSide::Bottom => {
+                border.border_bottom_width = Au(0);
+                border.border_bottom_style = BorderStyle::none;
+                style.padding.make_unique().padding_bottom =
+                    computed::LengthOrPercentage::Length(Au(0));
+                style.margin.make_unique().margin_bottom =
+                    computed::LengthOrPercentageOrAuto::Length(Au(0))
+            }
+            PhysicalSide::Top => {
+                border.border_top_width = Au(0);
+                border.border_top_style = BorderStyle::none;
+                style.padding.make_unique().padding_top =
+                    computed::LengthOrPercentage::Length(Au(0));
+                style.margin.make_unique().margin_top =
+                    computed::LengthOrPercentageOrAuto::Length(Au(0))
             }
         }
     }

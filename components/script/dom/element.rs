@@ -619,14 +619,13 @@ impl<'a> ElementHelpers<'a> for &'a Element {
     }
 
     fn remove_inline_style_property(self, property: DOMString) {
-        #![allow(unsafe_code)] // #6376
         let mut inline_declarations = self.style_attribute.borrow_mut();
         if let &mut Some(ref mut declarations) = &mut *inline_declarations {
             let index = declarations.normal
                                     .iter()
                                     .position(|decl| decl.name() == property);
             if let Some(index) = index {
-                unsafe { declarations.normal.make_unique().remove(index); }
+                declarations.normal.make_unique().remove(index);
                 return;
             }
 
@@ -634,20 +633,19 @@ impl<'a> ElementHelpers<'a> for &'a Element {
                                     .iter()
                                     .position(|decl| decl.name() == property);
             if let Some(index) = index {
-                unsafe { declarations.important.make_unique().remove(index); }
+                declarations.important.make_unique().remove(index);
                 return;
             }
         }
     }
 
     fn update_inline_style(self, property_decl: PropertyDeclaration, style_priority: StylePriority) {
-        #![allow(unsafe_code)] // #6376
         let mut inline_declarations = self.style_attribute().borrow_mut();
         if let &mut Some(ref mut declarations) = &mut *inline_declarations {
             let existing_declarations = if style_priority == StylePriority::Important {
-                unsafe { declarations.important.make_unique() }
+                declarations.important.make_unique()
             } else {
-                unsafe { declarations.normal.make_unique() }
+                declarations.normal.make_unique()
             };
 
             for declaration in existing_declarations.iter_mut() {
