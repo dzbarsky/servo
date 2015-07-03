@@ -20,7 +20,7 @@ extern crate syntax;
 #[macro_use]
 extern crate rustc;
 
-extern crate tenacious;
+// extern crate tenacious;
 
 use rustc::lint::LintPassObject;
 use rustc::plugin::Registry;
@@ -54,5 +54,5 @@ pub fn plugin_registrar(reg: &mut Registry) {
     reg.register_lint_pass(box lints::inheritance_integrity::InheritancePass as LintPassObject);
     reg.register_lint_pass(box lints::str_to_string::StrToStringPass as LintPassObject);
     reg.register_lint_pass(box lints::ban::BanPass as LintPassObject);
-    reg.register_lint_pass(box tenacious::TenaciousPass as LintPassObject);
+    // reg.register_lint_pass(box tenacious::TenaciousPass as LintPassObject);
 }
