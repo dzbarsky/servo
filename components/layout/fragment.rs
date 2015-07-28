@@ -1956,7 +1956,8 @@ impl Fragment {
             relative_containing_block_size.to_physical(relative_containing_block_mode);
         let border_box = self.border_box.to_physical(self.style.writing_mode, container_size);
         if coordinate_system == CoordinateSystem::Own && self.establishes_stacking_context() {
-            return Rect::new(ZERO_POINT, border_box.size)
+            let margin = self.margin.to_physical(self.style.writing_mode);
+            return Rect::new(Point2D::new(margin.left, margin.top), border_box.size)
         }
 
         // FIXME(pcwalton): This can double-count relative position sometimes for inlines (e.g.
