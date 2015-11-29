@@ -19,8 +19,8 @@ interface CanvasRenderingContext2D {
   readonly attribute HTMLCanvasElement canvas;
 
   // canvas dimensions
-  //         attribute unsigned long width;
-  //         attribute unsigned long height;
+  attribute unsigned long width;
+  attribute unsigned long height;
 
   // for contexts that aren't directly fixed to a specific canvas
   //void commit(); // push the image to the output bitmap

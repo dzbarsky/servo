@@ -502,6 +502,22 @@ impl CanvasRenderingContext2DMethods for CanvasRenderingContext2D {
         Root::from_ref(&*self.canvas)
     }
 
+    fn Width(&self) -> u32 {
+        self.Canvas().Width()
+    }
+
+    fn SetWidth(&self, width: u32) {
+        self.Canvas().SetWidth(width)
+    }
+
+    fn Height(&self) -> u32 {
+        self.Canvas().Height()
+    }
+
+    fn SetHeight(&self, height: u32) {
+        self.Canvas().SetHeight(height)
+    }
+
     // https://html.spec.whatwg.org/multipage/#dom-context-2d-save
     fn Save(&self) {
         self.saved_states.borrow_mut().push(self.state.borrow().clone());
