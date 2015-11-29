@@ -303,6 +303,21 @@ impl WebGLRenderingContextMethods for WebGLRenderingContext {
         }
     }
 
+    // https://www.khronos.org/registry/webgl/specs/latest/1.0/#5.14.9
+    fn BindAttribLocation(&self, program: Option<&WebGLProgram>,
+                          index: GLuint, name: DOMString) -> WebGLResult {
+        if name.length > MAX_UNIFORM_AND_ATTRIBUTE_LEN {
+            return Err(WebGLError::InvalidValue);
+        }
+        if name.start_with("webgl_") || name.starts_with("_webgl_") {
+            return Err(WebGLError::InvalidOperation);
+        }
+        if let Some(program) = program {
+            self.ipc_renderer.send(
+                CanvasMsg::WebGL(CanvasWebGLMsg::BindAttribLocation(src_rgb, dest_rgb, src_alpha, dest_alpha))).unwrap();
+        }
+    }
+
     // https://www.khronos.org/registry/webgl/specs/latest/1.0/#5.14.5
     fn BindBuffer(&self, target: u32, buffer: Option<&WebGLBuffer>) {
         match target {
