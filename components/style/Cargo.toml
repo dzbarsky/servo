@@ -10,6 +10,12 @@ build = "build.rs"
 # https://github.com/rust-lang/cargo/issues/3544
 links = "servo_style_crate"
 
+[[bin]]
+name = "validator"
+path = "main.rs"
+test = false
+bench = false
+
 [lib]
 name = "style"
 path = "lib.rs"
@@ -38,6 +44,7 @@ crossbeam-channel = { version = "0.3", optional = true }
 derive_more = "0.13"
 new_debug_unreachable = "1.0"
 encoding_rs = {version = "0.8", optional = true}
+embedder_traits = { path = "../embedder_traits" }
 euclid = "0.20"
 fallible = { path = "../fallible" }
 fxhash = "0.2"

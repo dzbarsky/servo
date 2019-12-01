@@ -5342,6 +5342,7 @@ dependencies = [
  "crossbeam-channel",
  "cssparser",
  "derive_more",
+ "embedder_traits",
  "encoding_rs",
  "euclid",
  "fallible",
